@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck Cost Calculator — Estimate Your Deck or Patio Build</title>
+<meta name="description" content="Free deck and patio cost calculator. Get an instant ballpark estimate based on size, material, railing, and labor — with a live blueprint diagram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deep: #16324F;
+    --navy-panel: #1F425F;
+    --navy-panel-hover: #274d6e;
+    --cyan-line: #6FC3E8;
+    --cyan-dim: #3d6a83;
+    --cedar: #C97A3D;
+    --cedar-bright: #E0975B;
+    --text-primary: #F2F2EF;
+    --text-secondary: #A9BDCC;
+    --border-line: rgba(111, 195, 232, 0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy-deep);
+    background-image:
+      linear-gradient(var(--border-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-line);
+    padding-bottom: 28px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 560px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--navy-panel);
+    border: 1px solid var(--border-line);
+    border-radius: 4px;
+    padding: 28px;
+  }
+
+  .panel-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-line);
+  }
+
+  .field {
+    margin-bottom: 22px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .dims-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .dims-row .times {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--cyan-dim);
+    padding-bottom: 12px;
+    font-size: 18px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--navy-deep);
+    border: 1px solid var(--border-line);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    padding: 10px 12px;
+    border-radius: 3px;
+  }
+
+  input[type="number"]:focus {
+    outline: 2px solid var(--cedar);
+    outline-offset: 1px;
+    border-color: var(--cedar);
+  }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--navy-deep);
+    border: 1px solid var(--border-line);
+    color: var(--text-secondary);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    padding: 12px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .option-btn:hover {
+    border-color: var(--cyan-dim);
+    color: var(--text-primary);
+  }
+
+  .option-btn:focus-visible {
+    outline: 2px solid var(--cedar);
+    outline-offset: 2px;
+  }
+
+  .option-btn.active {
+    border-color: var(--cedar);
+    background: rgba(201, 122, 61, 0.12);
+    color: var(--text-primary);
+  }
+
+  .option-btn .price-hint {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan-line);
+    margin-top: 3px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .toggle-row .option-btn { flex: 1; text-align: center; }
+
+  /* Blueprint diagram panel */
+  .diagram-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .diagram-holder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0 8px;
+  }
+
+  svg#deckSvg { width: 100%; height: auto; max-width: 420px; }
+
+  .estimate-block {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-line);
+  }
+
+  .estimate-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 8px;
+  }
+
+  .estimate-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(32px, 5vw, 44px);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .estimate-value .dash { color: var(--cedar-bright); margin: 0 8px; }
+
+  .estimate-sub {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  .breakdown {
+    margin-top: 40px;
+  }
+
+  .breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+  }
+
+  .breakdown th {
+    text-align: left;
+    color: var(--cyan-line);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-line);
+  }
+
+  .breakdown th:last-child, .breakdown td:last-child { text-align: right; }
+
+  .breakdown td {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-line);
+    color: var(--text-secondary);
+  }
+
+  .breakdown tr:last-child td {
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: none;
+  }
+
+  .breakdown td:first-child { color: var(--text-primary); }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-line);
+    color: var(--text-secondary);
+    font-size: 13px;
+    max-width: 680px;
+  }
+
+  footer strong { color: var(--text-primary); }
+
+  .pricing-badge {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 6px 12px;
+    background: rgba(111, 195, 232, 0.1);
+    border: 1px solid var(--border-line);
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan-line);
+  }
+
+  .about-section {
+    margin-top: 40px;
+  }
+
+  .about-section details {
+    border-bottom: 1px solid var(--border-line);
+  }
+
+  .about-section details:first-of-type {
+    border-top: 1px solid var(--border-line);
+  }
+
+  .about-section summary {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 16px 4px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .about-section summary::before {
+    content: '+';
+    color: var(--cedar-bright);
+    font-size: 16px;
+    width: 14px;
+  }
+
+  .about-section details[open] summary::before {
+    content: '−';
+  }
+
+  .about-section summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .about-section summary:focus-visible {
+    outline: 2px solid var(--cedar);
+    outline-offset: 2px;
+  }
+
+  .about-section p {
+    padding: 0 4px 18px 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 680px;
+  }
+
+  .about-section em {
+    color: var(--text-primary);
+    font-style: normal;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Deck &amp; Patio Estimator</div>
+      <h1>What will your deck actually cost?</h1>
+      <p>Set your dimensions and materials below. The blueprint updates as you go, and the estimate breaks down exactly where the money's going.</p>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Inputs -->
+      <div class="panel">
+        <div class="panel-label">Dimensions</div>
+        <div class="field">
+          <div class="dims-row">
+            <div>
+              <label for="width">Width (ft)</label>
+              <input type="number" id="width" value="12" min="4" max="60">
+            </div>
+            <div class="times">×</div>
+            <div>
+              <label for="length">Length (ft)</label>
+              <input type="number" id="length" value="16" min="4" max="60">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Decking material</div>
+        <div class="field">
+          <div class="option-grid" id="materialOptions">
+            <button class="option-btn active" data-material="pt" data-low="15" data-high="20" data-lumber="true">
+              Pressure-treated pine
+              <span class="price-hint">$15–20 / sqft</span>
+            </button>
+            <button class="option-btn" data-material="cedar" data-low="25" data-high="30" data-lumber="true">
+              Cedar
+              <span class="price-hint">$25–30 / sqft</span>
+            </button>
+            <button class="option-btn" data-material="composite" data-low="35" data-high="45">
+              Composite
+              <span class="price-hint">$35–45 / sqft</span>
+            </button>
+            <button class="option-btn" data-material="pvc" data-low="40" data-high="50">
+              PVC
+              <span class="price-hint">$40–50 / sqft</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Height</div>
+        <div class="field">
+          <div class="toggle-row" id="heightOptions">
+            <button class="option-btn active" data-height="ground">Ground level</button>
+            <button class="option-btn" data-height="elevated">Elevated</button>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Railing</div>
+        <div class="field">
+          <div class="toggle-row" id="railingOptions">
+            <button class="option-btn" data-railing="none">No railing</button>
+            <button class="option-btn active" data-railing="yes">Full perimeter</button>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Who's building it</div>
+        <div class="field">
+          <div class="toggle-row" id="laborOptions">
+            <button class="option-btn" data-labor="diy">DIY</button>
+            <button class="option-btn active" data-labor="pro">Hired pro</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live blueprint + estimate -->
+      <div class="panel diagram-panel">
+        <div class="panel-label">Plan view</div>
+        <div class="diagram-holder">
+          <svg id="deckSvg" viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+            <!-- deck fill -->
+            <rect id="deckFill" x="80" y="60" width="240" height="180" fill="#C97A3D" fill-opacity="0.18" stroke="#6FC3E8" stroke-width="1.5"/>
+            <!-- plank lines -->
+            <g id="plankLines" stroke="#6FC3E8" stroke-opacity="0.35" stroke-width="1"></g>
+            <!-- dimension line: width (top) -->
+            <line x1="80" y1="40" x2="320" y2="40" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="80" y1="34" x2="80" y2="46" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="320" y1="34" x2="320" y2="46" stroke="#6FC3E8" stroke-width="1"/>
+            <text id="widthLabel" x="200" y="30" fill="#6FC3E8" font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">12 ft</text>
+            <!-- dimension line: length (left) -->
+            <line x1="55" y1="60" x2="55" y2="240" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="49" y1="60" x2="61" y2="60" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="49" y1="240" x2="61" y2="240" stroke="#6FC3E8" stroke-width="1"/>
+            <text id="lengthLabel" x="40" y="150" fill="#6FC3E8" font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle" transform="rotate(-90 40 150)">16 ft</text>
+            <!-- railing indicator -->
+            <rect id="railingOutline" x="76" y="56" width="248" height="188" fill="none" stroke="#E0975B" stroke-width="2" stroke-dasharray="4 3"/>
+          </svg>
+        </div>
+
+        <div class="estimate-block">
+          <div class="estimate-label">Estimated total cost</div>
+          <div class="estimate-value">
+            <span id="lowEst">$6,980</span><span class="dash">–</span><span id="highEst">$10,612</span>
+          </div>
+          <div class="estimate-sub" id="sqftNote">192 sq ft · 56 linear ft perimeter</div>
+          <div class="pricing-badge" id="pricingUpdatedNote">Lumber pricing: using baseline estimates</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <div class="panel-label">Cost breakdown</div>
+      <table>
+        <thead>
+          <tr><th>Category</th><th>Estimated range</th></tr>
+        </thead>
+        <tbody id="breakdownBody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="about-section">
+      <div class="panel-label">About these estimates</div>
+
+      <details open>
+        <summary>What updates automatically</summary>
+        <p>Pressure-treated pine and cedar prices track the Federal Reserve's Softwood Lumber Producer Price Index (FRED series WPU0811), refreshed on the 2nd of every month. When lumber costs move, those two material prices move with them — no one has to remember to update this page.</p>
+      </details>
+
+      <details>
+        <summary>What's reviewed manually</summary>
+        <p>Composite and PVC decking prices, labor rates, footing/foundation costs, and permit allowances aren't tied to any public live-data feed — nothing tracks these as structured data anywhere. These figures are reviewed and adjusted by hand roughly every 3-6 months based on current market pricing.</p>
+      </details>
+
+      <details>
+        <summary>What's <em>not</em> included</summary>
+        <p>This estimate covers the deck structure itself — framing, decking, railing, footings, and standard permitting. It does not include: removal/disposal of an existing deck, major site excavation or grading, electrical work (outlets, lighting), plumbing hookups, or HOA-specific fees, all of which vary too much by property to estimate meaningfully here.</p>
+      </details>
+
+      <details>
+        <summary>Why your local quote may differ</summary>
+        <p>These are national ballpark averages. Actual costs shift based on your region (coastal and high cost-of-living areas often run 15-30% higher), site accessibility (a hillside or hard-to-reach backyard raises labor costs), local permit fees, and which specific contractor you hire. Treat this number as a starting point for budgeting and a sanity-check on quotes — not a substitute for getting 2-3 real bids.</p>
+      </details>
+
+      <details>
+        <summary>Your privacy</summary>
+        <p>Every calculation on this page runs entirely in your browser. Nothing you enter — dimensions, material choice, or anything else — is sent anywhere, logged, or stored. Refresh the page and it's gone.</p>
+      </details>
+    </div>
+
+    <footer>
+      <p>Built as a free planning tool. Figures are estimates only — always confirm final pricing with a licensed local contractor before budgeting or signing a contract.</p>
+    </footer>
+  </div>
+
+<script>
+(function() {
+  const state = {
+    width: 12,
+    length: 16,
+    material: 'pt',
+    low: 15,
+    high: 20,
+    height: 'ground',
+    railing: 'yes',
+    labor: 'pro'
+  };
+
+  const widthInput = document.getElementById('width');
+  const lengthInput = document.getElementById('length');
+
+  function selectButton(groupEl, clicked, dataAttr) {
+    [...groupEl.children].forEach(b => b.classList.remove('active'));
+    clicked.classList.add('active');
+    return clicked.dataset[dataAttr];
+  }
+
+  document.getElementById('materialOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.material = selectButton(e.currentTarget, btn, 'material');
+    state.low = Number(btn.dataset.low);
+    state.high = Number(btn.dataset.high);
+    render();
+  });
+
+  document.getElementById('heightOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.height = selectButton(e.currentTarget, btn, 'height');
+    render();
+  });
+
+  document.getElementById('railingOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.railing = selectButton(e.currentTarget, btn, 'railing');
+    render();
+  });
+
+  document.getElementById('laborOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.labor = selectButton(e.currentTarget, btn, 'labor');
+    render();
+  });
+
+  widthInput.addEventListener('input', () => {
+    state.width = clampDim(widthInput.value);
+    render();
+  });
+  lengthInput.addEventListener('input', () => {
+    state.length = clampDim(lengthInput.value);
+    render();
+  });
+
+  function clampDim(v) {
+    const n = Number(v);
+    if (isNaN(n)) return 1;
+    return Math.min(60, Math.max(1, n));
+  }
+
+  function formatMoney(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function calculate() {
+    const sqft = state.width * state.length;
+    const perimeter = 2 * (state.width + state.length);
+
+    // Materials + install
+    const matLow = sqft * state.low;
+    const matHigh = sqft * state.high;
+
+    // Labor: folded into per-sqft price if hired; DIY removes ~40% of that
+    // (rough real-world split between materials and installation labor)
+    const laborFactor = state.labor === 'diy' ? 0.0 : 1.0;
+    const laborLow = state.labor === 'pro' ? sqft * 8 : 0;
+    const laborHigh = state.labor === 'pro' ? sqft * 12 : 0;
+
+    // Footings/foundation
+    const footingLow = state.height === 'elevated' ? 900 + sqft * 1.5 : 300 + sqft * 0.8;
+    const footingHigh = state.height === 'elevated' ? 1800 + sqft * 2.5 : 700 + sqft * 1.5;
+
+    // Railing (per linear ft of perimeter, only if selected)
+    const railLow = state.railing === 'yes' ? perimeter * 35 : 0;
+    const railHigh = state.railing === 'yes' ? perimeter * 55 : 0;
+
+    // Permits / misc flat allowance
+    const permitLow = 150;
+    const permitHigh = 400;
+
+    const totalLow = matLow + laborLow + footingLow + railLow + permitLow;
+    const totalHigh = matHigh + laborHigh + footingHigh + railHigh + permitHigh;
+
+    return {
+      sqft, perimeter,
+      matLow, matHigh,
+      laborLow, laborHigh,
+      footingLow, footingHigh,
+      railLow, railHigh,
+      permitLow, permitHigh,
+      totalLow, totalHigh
+    };
+  }
+
+  function updateDiagram() {
+    const svgWidthMax = 240;
+    const svgHeightMax = 180;
+    const baseX = 80, baseY = 60;
+
+    // Scale deck rect proportionally within a fixed box, preserving aspect ratio
+    const ratio = state.width / state.length;
+    let w, h;
+    if (ratio >= 1) {
+      w = svgWidthMax;
+      h = svgWidthMax / ratio;
+      if (h > svgHeightMax) { h = svgHeightMax; w = svgHeightMax * ratio; }
+    } else {
+      h = svgHeightMax;
+      w = svgHeightMax * ratio;
+      if (w > svgWidthMax) { w = svgWidthMax; h = svgWidthMax / ratio; }
+    }
+
+    const x = baseX + (svgWidthMax - w) / 2;
+    const y = baseY + (svgHeightMax - h) / 2;
+
+    const deckFill = document.getElementById('deckFill');
+    deckFill.setAttribute('x', x);
+    deckFill.setAttribute('y', y);
+    deckFill.setAttribute('width', w);
+    deckFill.setAttribute('height', h);
+
+    const materialColors = { pt: '#C97A3D', cedar: '#D98B4A', composite: '#8B6F5C', pvc: '#B7B2A6' };
+    deckFill.setAttribute('fill', materialColors[state.material] || '#C97A3D');
+
+    const railingOutline = document.getElementById('railingOutline');
+    if (state.railing === 'yes') {
+      railingOutline.setAttribute('x', x - 4);
+      railingOutline.setAttribute('y', y - 4);
+      railingOutline.setAttribute('width', w + 8);
+      railingOutline.setAttribute('height', h + 8);
+      railingOutline.style.display = 'block';
+    } else {
+      railingOutline.style.display = 'none';
+    }
+
+    // Plank lines across the width
+    const plankGroup = document.getElementById('plankLines');
+    plankGroup.innerHTML = '';
+    const plankCount = Math.max(3, Math.round(w / 18));
+    for (let i = 1; i < plankCount; i++) {
+      const px = x + (w / plankCount) * i;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', px);
+      line.setAttribute('y1', y);
+      line.setAttribute('x2', px);
+      line.setAttribute('y2', y + h);
+      plankGroup.appendChild(line);
+    }
+
+    // Dimension labels + lines
+    document.getElementById('widthLabel').textContent = state.width + ' ft';
+    document.getElementById('lengthLabel').textContent = state.length + ' ft';
+  }
+
+  function render() {
+    const r = calculate();
+
+    document.getElementById('lowEst').textContent = formatMoney(r.totalLow);
+    document.getElementById('highEst').textContent = formatMoney(r.totalHigh);
+    document.getElementById('sqftNote').textContent = r.sqft + ' sq ft · ' + Math.round(r.perimeter) + ' linear ft perimeter';
+
+    const rows = [
+      ['Decking materials', r.matLow, r.matHigh],
+      ['Labor', r.laborLow, r.laborHigh],
+      ['Footings & foundation', r.footingLow, r.footingHigh],
+      ['Railing', r.railLow, r.railHigh],
+      ['Permits & misc.', r.permitLow, r.permitHigh],
+      ['Total', r.totalLow, r.totalHigh],
+    ];
+
+    const tbody = document.getElementById('breakdownBody');
+    tbody.innerHTML = rows.map(([label, low, high]) => {
+      if (low === 0 && high === 0) {
+        return `<tr><td>${label}</td><td>—</td></tr>`;
+      }
+      return `<tr><td>${label}</td><td>${formatMoney(low)}–${formatMoney(high)}</td></tr>`;
+    }).join('');
+
+    updateDiagram();
+  }
+
+  // Live lumber pricing: fetches a monthly-updated multiplier (derived
+  // from the FRED softwood lumber index) and scales the pressure-treated
+  // and cedar price buttons accordingly. Composite, PVC, labor, and
+  // footing costs have no public live-data source, so those stay fixed —
+  // see README for how to update those manually.
+  function applyLumberPricing(pricingData) {
+    const buttons = document.querySelectorAll('[data-lumber="true"]');
+    buttons.forEach(btn => {
+      const baseLow = Number(btn.dataset.low);
+      const baseHigh = Number(btn.dataset.high);
+      const adjLow = Math.round(baseLow * pricingData.multiplier);
+      const adjHigh = Math.round(baseHigh * pricingData.multiplier);
+
+      btn.dataset.adjLow = adjLow;
+      btn.dataset.adjHigh = adjHigh;
+      const hint = btn.querySelector('.price-hint');
+      if (hint) hint.textContent = `$${adjLow}–${adjHigh} / sqft`;
+
+      // If this material is the currently active one, update live state
+      if (btn.classList.contains('active')) {
+        state.low = adjLow;
+        state.high = adjHigh;
+      }
+    });
+
+    const pct = ((pricingData.multiplier - 1) * 100).toFixed(1);
+    const sign = pct >= 0 ? '+' : '';
+    const note = document.getElementById('pricingUpdatedNote');
+    if (note) {
+      note.textContent = `Lumber pricing updated ${pricingData.observation_date} · ${sign}${pct}% vs. baseline (source: FRED WPU0811)`;
+    }
+
+    render();
+  }
+
+  fetch('./pricing.json')
+    .then(res => {
+      if (!res.ok) throw new Error('pricing.json not found');
+      return res.json();
+    })
+    .then(applyLumberPricing)
+    .catch(() => {
+      // No pricing.json yet (first deploy, before the monthly job has
+      // run once) — silently keep the hardcoded baseline prices already
+      // in the HTML. Not an error state for the visitor.
+    });
+
+  render();
+})();
+</script>
+</body>
+</html>
