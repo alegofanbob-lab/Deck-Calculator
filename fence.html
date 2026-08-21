@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fence Cost Calculator — Estimate Your Fence Installation Cost</title>
+<meta name="description" content="Free fence cost calculator covering wood, vinyl, chain-link, aluminum, and composite. Get an instant estimate with a live blueprint diagram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deep: #16324F;
+    --navy-panel: #1F425F;
+    --navy-panel-hover: #274d6e;
+    --cyan-line: #6FC3E8;
+    --cyan-dim: #3d6a83;
+    --cedar: #C97A3D;
+    --cedar-bright: #E0975B;
+    --text-primary: #F2F2EF;
+    --text-secondary: #A9BDCC;
+    --border-line: rgba(111, 195, 232, 0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy-deep);
+    background-image:
+      linear-gradient(var(--border-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .site-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-line);
+  }
+
+  .site-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 3px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .site-nav a:hover { background: var(--navy-panel); color: var(--text-primary); }
+  .site-nav a.active { background: rgba(201, 122, 61, 0.15); color: var(--cedar-bright); }
+
+  header { margin-bottom: 40px; border-bottom: 1px solid var(--border-line); padding-bottom: 28px; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  header p { color: var(--text-secondary); font-size: 16px; max-width: 560px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--navy-panel); border: 1px solid var(--border-line); border-radius: 4px; padding: 28px; }
+
+  .panel-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border-line); }
+
+  .field { margin-bottom: 22px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--navy-deep);
+    border: 1px solid var(--border-line);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    padding: 10px 12px;
+    border-radius: 3px;
+  }
+
+  input[type="number"]:focus { outline: 2px solid var(--cedar); outline-offset: 1px; border-color: var(--cedar); }
+
+  .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  .option-btn {
+    background: var(--navy-deep);
+    border: 1px solid var(--border-line);
+    color: var(--text-secondary);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    padding: 12px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .option-btn:hover { border-color: var(--cyan-dim); color: var(--text-primary); }
+  .option-btn:focus-visible { outline: 2px solid var(--cedar); outline-offset: 2px; }
+  .option-btn.active { border-color: var(--cedar); background: rgba(201, 122, 61, 0.12); color: var(--text-primary); }
+
+  .option-btn .price-hint {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan-line);
+    margin-top: 3px;
+  }
+
+  .toggle-row { display: flex; gap: 10px; }
+  .toggle-row .option-btn { flex: 1; text-align: center; }
+
+  .diagram-panel { display: flex; flex-direction: column; }
+  .diagram-holder { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px 0 8px; }
+  svg#fenceSvg { width: 100%; height: auto; max-width: 420px; }
+
+  .estimate-block { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-line); }
+
+  .estimate-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan-line);
+    margin-bottom: 8px;
+  }
+
+  .estimate-value { font-family: 'IBM Plex Mono', monospace; font-size: clamp(32px, 5vw, 44px); font-weight: 600; color: var(--text-primary); }
+  .estimate-value .dash { color: var(--cedar-bright); margin: 0 8px; }
+  .estimate-sub { color: var(--text-secondary); font-size: 13px; margin-top: 6px; }
+
+  .pricing-badge {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 6px 12px;
+    background: rgba(111, 195, 232, 0.1);
+    border: 1px solid var(--border-line);
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan-line);
+  }
+
+  .breakdown { margin-top: 40px; }
+  .breakdown table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
+
+  .breakdown th {
+    text-align: left;
+    color: var(--cyan-line);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-line);
+  }
+
+  .breakdown th:last-child, .breakdown td:last-child { text-align: right; }
+  .breakdown td { padding: 12px 0; border-bottom: 1px solid var(--border-line); color: var(--text-secondary); }
+  .breakdown tr:last-child td { color: var(--text-primary); font-weight: 600; border-bottom: none; }
+  .breakdown td:first-child { color: var(--text-primary); }
+
+  .about-section { margin-top: 40px; }
+  .about-section details { border-bottom: 1px solid var(--border-line); }
+  .about-section details:first-of-type { border-top: 1px solid var(--border-line); }
+
+  .about-section summary {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 16px 4px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .about-section summary::before { content: '+'; color: var(--cedar-bright); font-size: 16px; width: 14px; }
+  .about-section details[open] summary::before { content: '−'; }
+  .about-section summary::-webkit-details-marker { display: none; }
+  .about-section summary:focus-visible { outline: 2px solid var(--cedar); outline-offset: 2px; }
+  .about-section p { padding: 0 4px 18px 24px; color: var(--text-secondary); font-size: 14px; max-width: 680px; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-line);
+    color: var(--text-secondary);
+    font-size: 13px;
+    max-width: 680px;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="site-nav">
+      <a href="index.html">Deck Cost</a>
+      <a href="fence.html" class="active">Fence Cost</a>
+      <a href="concrete.html">Concrete Cost</a>
+    </nav>
+
+    <header>
+      <div class="eyebrow">Fence Estimator</div>
+      <h1>What will your fence actually cost?</h1>
+      <p>Set your fence length and material below. The blueprint updates as you go, and the estimate breaks down exactly where the money's going.</p>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Inputs -->
+      <div class="panel">
+        <div class="panel-label">Fence length</div>
+        <div class="field">
+          <label for="length">Total linear feet</label>
+          <input type="number" id="length" value="150" min="10" max="2000">
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Fence height</div>
+        <div class="field">
+          <div class="toggle-row" id="heightOptions">
+            <button class="option-btn active" data-height="4">4 ft</button>
+            <button class="option-btn" data-height="6">6 ft</button>
+            <button class="option-btn" data-height="8">8 ft</button>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Material</div>
+        <div class="field">
+          <div class="option-grid" id="materialOptions">
+            <button class="option-btn active" data-material="wood" data-low="15" data-high="25" data-lumber="true">
+              Wood
+              <span class="price-hint">$15–25 / linear ft</span>
+            </button>
+            <button class="option-btn" data-material="chainlink" data-low="8" data-high="18">
+              Chain link
+              <span class="price-hint">$8–18 / linear ft</span>
+            </button>
+            <button class="option-btn" data-material="vinyl" data-low="20" data-high="35">
+              Vinyl
+              <span class="price-hint">$20–35 / linear ft</span>
+            </button>
+            <button class="option-btn" data-material="aluminum" data-low="25" data-high="45">
+              Aluminum
+              <span class="price-hint">$25–45 / linear ft</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Gates</div>
+        <div class="field">
+          <label for="gates">Number of gates</label>
+          <input type="number" id="gates" value="1" min="0" max="10">
+        </div>
+
+        <div class="panel-label" style="margin-top:28px;">Who's building it</div>
+        <div class="field">
+          <div class="toggle-row" id="laborOptions">
+            <button class="option-btn" data-labor="diy">DIY</button>
+            <button class="option-btn active" data-labor="pro">Hired pro</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live blueprint + estimate -->
+      <div class="panel diagram-panel">
+        <div class="panel-label">Plan view</div>
+        <div class="diagram-holder">
+          <svg id="fenceSvg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+            <line id="fenceLine" x1="60" y1="120" x2="340" y2="120" stroke="#C97A3D" stroke-width="4" stroke-opacity="0.7"/>
+            <g id="postMarks"></g>
+            <line x1="60" y1="150" x2="340" y2="150" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="60" y1="144" x2="60" y2="156" stroke="#6FC3E8" stroke-width="1"/>
+            <line x1="340" y1="144" x2="340" y2="156" stroke="#6FC3E8" stroke-width="1"/>
+            <text id="lengthLabel" x="200" y="172" fill="#6FC3E8" font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">150 ft</text>
+            <text id="heightLabel" x="200" y="90" fill="#A9BDCC" font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">4 ft height</text>
+          </svg>
+        </div>
+
+        <div class="estimate-block">
+          <div class="estimate-label">Estimated total cost</div>
+          <div class="estimate-value">
+            <span id="lowEst">$2,400</span><span class="dash">–</span><span id="highEst">$4,150</span>
+          </div>
+          <div class="estimate-sub" id="lengthNote">150 linear ft · 4 ft height</div>
+          <div class="pricing-badge" id="pricingUpdatedNote">Lumber pricing: using baseline estimates</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <div class="panel-label">Cost breakdown</div>
+      <table>
+        <thead><tr><th>Category</th><th>Estimated range</th></tr></thead>
+        <tbody id="breakdownBody"></tbody>
+      </table>
+    </div>
+
+    <div class="about-section">
+      <div class="panel-label">About these estimates</div>
+
+      <details open>
+        <summary>What updates automatically</summary>
+        <p>Wood fence pricing tracks the same Federal Reserve Softwood Lumber Producer Price Index (FRED series WPU0811) used by our deck calculator, refreshed on the 2nd of every month.</p>
+      </details>
+
+      <details>
+        <summary>What's reviewed manually</summary>
+        <p>Chain-link, vinyl, and aluminum fencing have no public live-data source — nothing tracks these as structured data anywhere. These figures are reviewed roughly every 3-6 months.</p>
+      </details>
+
+      <details>
+        <summary>What's <em>not</em> included</summary>
+        <p>This covers fence materials, standard post-setting, and basic labor. It does not include: removal of an existing fence, extensive grading/excavation for sloped yards, or HOA-specific style requirements.</p>
+      </details>
+
+      <details>
+        <summary>Setting posts in concrete</summary>
+        <p>Every fence post needs a concrete footing. Use our <a href="concrete.html" style="color: var(--cyan-line);">concrete calculator</a> to estimate how many bags you'll need based on your post count and hole size.</p>
+      </details>
+    </div>
+
+    <footer>
+      <p>Built as a free planning tool. Figures are estimates only — always confirm final pricing with a licensed local contractor before budgeting or signing a contract.</p>
+    </footer>
+  </div>
+
+<script>
+(function() {
+  const state = {
+    length: 150,
+    height: 4,
+    material: 'wood',
+    low: 15,
+    high: 25,
+    gates: 1,
+    labor: 'pro'
+  };
+
+  function selectButton(groupEl, clicked, dataAttr) {
+    [...groupEl.children].forEach(b => b.classList.remove('active'));
+    clicked.classList.add('active');
+    return clicked.dataset[dataAttr];
+  }
+
+  document.getElementById('materialOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.material = selectButton(e.currentTarget, btn, 'material');
+    state.low = Number(btn.dataset.low);
+    state.high = Number(btn.dataset.high);
+    render();
+  });
+
+  document.getElementById('heightOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.height = Number(selectButton(e.currentTarget, btn, 'height'));
+    render();
+  });
+
+  document.getElementById('laborOptions').addEventListener('click', (e) => {
+    const btn = e.target.closest('.option-btn');
+    if (!btn) return;
+    state.labor = selectButton(e.currentTarget, btn, 'labor');
+    render();
+  });
+
+  document.getElementById('length').addEventListener('input', (e) => {
+    state.length = clamp(e.target.value, 10, 2000);
+    render();
+  });
+
+  document.getElementById('gates').addEventListener('input', (e) => {
+    state.gates = clamp(e.target.value, 0, 10);
+    render();
+  });
+
+  function clamp(v, min, max) {
+    const n = Number(v);
+    if (isNaN(n)) return min;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function formatMoney(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function calculate() {
+    // state.low/high are installed (materials + labor) price per linear
+    // foot, matching how real-world fence quotes are typically presented.
+    // For DIY, we strip out the labor portion rather than adding labor on
+    // top of an already-installed price (labor is roughly 45% of an
+    // installed fence project's total cost).
+    const heightFactor = state.height === 4 ? 1.0 : state.height === 6 ? 1.35 : 1.7;
+    const installedLow = state.length * state.low * heightFactor;
+    const installedHigh = state.length * state.high * heightFactor;
+
+    const diyFactor = 0.55; // remaining share after stripping ~45% labor
+    const materialsLow = state.labor === 'diy' ? installedLow * diyFactor : installedLow;
+    const materialsHigh = state.labor === 'diy' ? installedHigh * diyFactor : installedHigh;
+
+    // Posts + concrete footings, roughly one post per 8 linear ft
+    const postCount = Math.ceil(state.length / 8);
+    const postsLow = postCount * 18;
+    const postsHigh = postCount * 32;
+
+    const gateLow = state.gates * 150;
+    const gateHigh = state.gates * 400;
+
+    const permitLow = 50;
+    const permitHigh = 150;
+
+    const totalLow = materialsLow + postsLow + gateLow + permitLow;
+    const totalHigh = materialsHigh + postsHigh + gateHigh + permitHigh;
+
+    return { materialsLow, materialsHigh, postsLow, postsHigh, gateLow, gateHigh,
+             permitLow, permitHigh, totalLow, totalHigh, postCount };
+  }
+
+  function updateDiagram() {
+    document.getElementById('lengthLabel').textContent = state.length + ' ft';
+    document.getElementById('heightLabel').textContent = state.height + ' ft height';
+
+    const materialColors = { wood: '#C97A3D', chainlink: '#8B95A0', vinyl: '#D4D0C8', aluminum: '#9AA5AC' };
+    document.getElementById('fenceLine').setAttribute('stroke', materialColors[state.material] || '#C97A3D');
+
+    // Draw post marks along the fence line proportional to post count
+    const postGroup = document.getElementById('postMarks');
+    postGroup.innerHTML = '';
+    const r = calculate();
+    const spacing = 280 / Math.max(r.postCount - 1, 1);
+    for (let i = 0; i < r.postCount; i++) {
+      const x = 60 + spacing * i;
+      const post = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      post.setAttribute('x1', x);
+      post.setAttribute('y1', 112);
+      post.setAttribute('x2', x);
+      post.setAttribute('y2', 128);
+      post.setAttribute('stroke', '#6FC3E8');
+      post.setAttribute('stroke-width', '2');
+      postGroup.appendChild(post);
+    }
+  }
+
+  function render() {
+    const r = calculate();
+    document.getElementById('lowEst').textContent = formatMoney(r.totalLow);
+    document.getElementById('highEst').textContent = formatMoney(r.totalHigh);
+    document.getElementById('lengthNote').textContent = state.length + ' linear ft · ' + state.height + ' ft height · ' + r.postCount + ' posts';
+
+    const rows = [
+      [state.labor === 'diy' ? 'Materials (DIY)' : 'Materials & labor (installed)', r.materialsLow, r.materialsHigh],
+      ['Posts & footings', r.postsLow, r.postsHigh],
+      ['Gates', r.gateLow, r.gateHigh],
+      ['Permits & misc.', r.permitLow, r.permitHigh],
+      ['Total', r.totalLow, r.totalHigh],
+    ];
+
+    document.getElementById('breakdownBody').innerHTML = rows.map(([label, low, high]) => {
+      if (low === 0 && high === 0) return `<tr><td>${label}</td><td>—</td></tr>`;
+      return `<tr><td>${label}</td><td>${formatMoney(low)}–${formatMoney(high)}</td></tr>`;
+    }).join('');
+
+    updateDiagram();
+  }
+
+  function applyLumberPricing(pricingData) {
+    const lumber = pricingData.lumber;
+    if (!lumber) return;
+
+    const buttons = document.querySelectorAll('[data-lumber="true"]');
+    buttons.forEach(btn => {
+      const baseLow = Number(btn.dataset.low);
+      const baseHigh = Number(btn.dataset.high);
+      const adjLow = Math.round(baseLow * lumber.multiplier);
+      const adjHigh = Math.round(baseHigh * lumber.multiplier);
+      btn.dataset.adjLow = adjLow;
+      btn.dataset.adjHigh = adjHigh;
+      const hint = btn.querySelector('.price-hint');
+      if (hint) hint.textContent = `$${adjLow}–${adjHigh} / linear ft`;
+      if (btn.classList.contains('active')) {
+        state.low = adjLow;
+        state.high = adjHigh;
+      }
+    });
+
+    const pct = ((lumber.multiplier - 1) * 100).toFixed(1);
+    const sign = pct >= 0 ? '+' : '';
+    const note = document.getElementById('pricingUpdatedNote');
+    if (note) {
+      note.textContent = `Lumber pricing updated ${lumber.observation_date} · ${sign}${pct}% vs. baseline (source: FRED ${lumber.series})`;
+    }
+    render();
+  }
+
+  fetch('./pricing.json')
+    .then(res => { if (!res.ok) throw new Error('not found'); return res.json(); })
+    .then(applyLumberPricing)
+    .catch(() => {});
+
+  render();
+})();
+</script>
+</body>
+</html>
