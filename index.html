@@ -397,11 +397,43 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
+  .site-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-line);
+  }
+
+  .site-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 3px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .site-nav a:hover {
+    background: var(--navy-panel);
+    color: var(--text-primary);
+  }
+
+  .site-nav a.active {
+    background: rgba(201, 122, 61, 0.15);
+    color: var(--cedar-bright);
   }
 </style>
 </head>
 <body>
   <div class="wrap">
+    <nav class="site-nav">
+      <a href="index.html" class="active">Deck Cost</a>
+      <a href="fence.html">Fence Cost</a>
+      <a href="concrete.html">Concrete Cost</a>
+    </nav>
+
     <header>
       <div class="eyebrow">Deck &amp; Patio Estimator</div>
       <h1>What will your deck actually cost?</h1>
@@ -779,12 +811,15 @@
   // footing costs have no public live-data source, so those stay fixed —
   // see README for how to update those manually.
   function applyLumberPricing(pricingData) {
+    const lumber = pricingData.lumber;
+    if (!lumber) return; // pricing.json exists but not yet in the new nested format
+
     const buttons = document.querySelectorAll('[data-lumber="true"]');
     buttons.forEach(btn => {
       const baseLow = Number(btn.dataset.low);
       const baseHigh = Number(btn.dataset.high);
-      const adjLow = Math.round(baseLow * pricingData.multiplier);
-      const adjHigh = Math.round(baseHigh * pricingData.multiplier);
+      const adjLow = Math.round(baseLow * lumber.multiplier);
+      const adjHigh = Math.round(baseHigh * lumber.multiplier);
 
       btn.dataset.adjLow = adjLow;
       btn.dataset.adjHigh = adjHigh;
@@ -798,11 +833,11 @@
       }
     });
 
-    const pct = ((pricingData.multiplier - 1) * 100).toFixed(1);
+    const pct = ((lumber.multiplier - 1) * 100).toFixed(1);
     const sign = pct >= 0 ? '+' : '';
     const note = document.getElementById('pricingUpdatedNote');
     if (note) {
-      note.textContent = `Lumber pricing updated ${pricingData.observation_date} · ${sign}${pct}% vs. baseline (source: FRED WPU0811)`;
+      note.textContent = `Lumber pricing updated ${lumber.observation_date} · ${sign}${pct}% vs. baseline (source: FRED ${lumber.series})`;
     }
 
     render();
