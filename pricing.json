@@ -2,16 +2,16 @@
   "lumber": {
     "series": "WPU0811",
     "baseline_index": 300.614,
-    "current_index": 300.614,
-    "observation_date": "2026-07-01",
-    "multiplier": 1.0
+    "current_index": 294.899,
+    "observation_date": "2026-08-01",
+    "multiplier": 0.981
   },
   "concrete": {
     "series": "WPU13330101",
     "baseline_index": 394.468,
-    "current_index": 394.468,
-    "observation_date": "2026-07-01",
-    "multiplier": 1.0
+    "current_index": 395.186,
+    "observation_date": "2026-08-01",
+    "multiplier": 1.0018
   },
-  "last_updated_utc": "2026-09-02T10:04:49Z"
+  "last_updated_utc": "2026-10-02T11:29:04Z"
 }
